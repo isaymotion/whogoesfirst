@@ -1,0 +1,10 @@
+{
+  "name": "Who Goes First? — A Tiny Garden Game",
+  "short_name": "Who Goes First",
+  "description": "A botanical multitouch game for deciding who goes first.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f5ec",
+  "theme_color": "#f7f5ec",
+  "orientation": "any"
+}
