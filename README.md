@@ -6,17 +6,17 @@ A cozy botanical multitouch web app for deciding who starts a board game. Design
 
 1. Open the app on a touchscreen.
 2. Each player places and holds one finger in the garden (2–6 players).
-3. Every new finger restarts the five-second joining window.
-4. When the garden has been untouched for five seconds, plants grow during a four-second countdown.
+3. Every new finger restarts the two-second joining window.
+4. When the garden has been untouched for two seconds, plants grow during a two-second countdown.
 5. One player is randomly selected: their plant blooms into a sunflower; the others return to seeds.
 6. Tap **Play again** to start a fresh round.
 
 ## Features
 
 - Tracks separate simultaneous pointer IDs (up to six participants).
-- Five-second join window resets when a participant joins or leaves.
-- Four-second countdown uses elapsed time rather than assuming each timer callback runs exactly on time.
-- Cryptographically backed random selection with rejection sampling when Web Crypto is available.
+- Two-second join window resets when a participant joins or leaves.
+- Two-second growth countdown uses elapsed time rather than assuming each timer callback runs exactly on time.
+- Cryptographically strong random selection with unbiased rejection sampling using Web Crypto; no weaker pseudo-random fallback.
 - Touch-friendly layout, safe-area padding, `touch-action: none`, and no external libraries.
 - Optional synthesized sound and vibration; both degrade gracefully when unavailable.
 - Respects `prefers-reduced-motion`.
@@ -57,3 +57,8 @@ A web page cannot guarantee that every physical finger will be reported by every
 ## License
 
 MIT — see [LICENSE](./LICENSE).
+
+
+## Attribution
+
+App created by Isabella Navarro, MD. Latest version October 2026. Contact: isaymotion@gmail.com
