@@ -15,7 +15,7 @@
   const soundIcon = document.getElementById("sound-icon");
 
   const JOIN_WINDOW_MS = 2000;
-  const GROWTH_COUNTDOWN_MS = 3000;
+  const GROWTH_COUNTDOWN_MS = 2000;
   const MAX_PLAYERS = 6;
   const PALETTE = [
     ["#5b9367", "#c6dfad"], ["#d18b64", "#f2c4a2"], ["#718db8", "#c4d5ee"],
@@ -210,14 +210,14 @@
     const token = roundToken;
     setStatus("The garden is growing…", "Hold still for the big reveal.");
     plants.forEach(p => p.el.classList.add("is-grown"));
-    let remaining = 3;
+    let remaining = Math.ceil(GROWTH_COUNTDOWN_MS / 1000);
     showCountdown(remaining);
     countdownSound(remaining);
     const startedAt = performance.now();
     function tick() {
       if (token !== roundToken || state !== State.COUNTDOWN) return;
       const elapsed = performance.now() - startedAt;
-      const next = Math.max(0, 3 - Math.floor(elapsed / 1000));
+      const next = Math.max(0, Math.ceil(GROWTH_COUNTDOWN_MS / 1000) - Math.floor(elapsed / 1000));
       if (next !== remaining && next > 0) {
         remaining = next;
         showCountdown(remaining);
@@ -281,15 +281,20 @@
   }
 
   function secureRandomIndex(max) {
-    if (window.crypto && window.crypto.getRandomValues) {
-      const range = 0x100000000;
-      const limit = range - (range % max);
-      const values = new Uint32Array(1);
-      let value;
-      do { window.crypto.getRandomValues(values); value = values[0]; } while (value >= limit);
-      return value % max;
+    // GitHub Pages is HTTPS, so Web Crypto is available. Use a cryptographically
+    // strong random value and rejection sampling so every participant has equal odds.
+    if (!window.crypto || typeof window.crypto.getRandomValues !== "function") {
+      throw new Error("Secure randomness is unavailable in this browser.");
     }
-    return Math.floor(Math.random() * max);
+    const range = 0x100000000;
+    const limit = range - (range % max);
+    const values = new Uint32Array(1);
+    let value;
+    do {
+      window.crypto.getRandomValues(values);
+      value = values[0];
+    } while (value >= limit);
+    return value % max;
   }
 
   function cancelRound(message) {
