@@ -14,8 +14,8 @@
   const soundToggle = document.getElementById("sound-toggle");
   const soundIcon = document.getElementById("sound-icon");
 
-  const JOIN_WINDOW_MS = 5000;
-  const GROWTH_COUNTDOWN_MS = 4000;
+  const JOIN_WINDOW_MS = 3000;
+  const GROWTH_COUNTDOWN_MS = 3000;
   const MAX_PLAYERS = 6;
   const PALETTE = [
     ["#5b9367", "#c6dfad"], ["#d18b64", "#f2c4a2"], ["#718db8", "#c4d5ee"],
@@ -95,30 +95,42 @@
   }
 
   function plantSvg() {
-    return `<svg viewBox="0 0 100 150" aria-hidden="true">
-      <ellipse class="soil" cx="50" cy="137" rx="22" ry="5"/>
-      <path class="stem" pathLength="1" d="M50 136 C48 112 52 89 50 65"/>
-      <path class="leaf" d="M49 108 C25 111 18 95 19 84 C39 84 50 94 49 108Z"/>
-      <path class="leaf" d="M51 94 C74 95 83 79 81 67 C61 69 50 80 51 94Z"/>
-      <path class="leaf" d="M50 75 C31 75 26 61 29 51 C45 54 52 64 50 75Z"/>
-      <path class="bud" d="M50 69 C35 62 34 48 43 41 C44 51 49 54 50 69Z"/>
-      <path class="bud" d="M50 69 C65 62 66 48 57 41 C56 51 51 54 50 69Z"/>
-      <path class="bud" d="M50 65 C38 51 43 37 50 34 C57 37 62 51 50 65Z"/>
+    return `<svg viewBox="0 0 100 170" aria-hidden="true">
+      <ellipse class="soil" cx="50" cy="153" rx="22" ry="5"/>
+      <g class="seed">
+        <ellipse cx="50" cy="145" rx="6.5" ry="8" fill="#9c7547" stroke="#7e5b35" stroke-width="1.5"/>
+        <path d="M48 140 Q52 144 49 149" fill="none" stroke="#d6b47d" stroke-width="1.4" stroke-linecap="round"/>
+      </g>
+      <path class="stem" pathLength="1" d="M50 149 C48 126 52 103 50 72"/>
+      <path class="leaf leaf-a" d="M49 128 C24 131 17 113 19 101 C39 101 51 113 49 128Z"/>
+      <path class="leaf leaf-b" d="M51 113 C76 114 84 96 81 84 C61 86 49 98 51 113Z"/>
+      <path class="leaf leaf-c" d="M50 96 C29 96 24 80 28 69 C44 72 52 83 50 96Z"/>
+      <path class="leaf leaf-d" d="M51 82 C69 82 75 67 71 57 C57 60 49 70 51 82Z"/>
+      <g class="bud">
+        <path d="M50 76 C35 68 34 54 43 47 C44 57 49 61 50 76Z"/>
+        <path d="M50 76 C65 68 66 54 57 47 C56 57 51 61 50 76Z"/>
+        <path d="M50 72 C38 58 43 44 50 40 C57 44 62 58 50 72Z"/>
+      </g>
       <g class="flower">
-        <g fill="#f3c742" stroke="#dba72d" stroke-width="1.2">
-          <ellipse cx="50" cy="30" rx="8" ry="19"/>
-          <ellipse cx="50" cy="30" rx="8" ry="19" transform="rotate(45 50 30)"/>
-          <ellipse cx="50" cy="30" rx="8" ry="19" transform="rotate(90 50 30)"/>
-          <ellipse cx="50" cy="30" rx="8" ry="19" transform="rotate(135 50 30)"/>
-          <ellipse cx="50" cy="30" rx="8" ry="19" transform="rotate(22.5 50 30)"/>
-          <ellipse cx="50" cy="30" rx="8" ry="19" transform="rotate(67.5 50 30)"/>
-          <ellipse cx="50" cy="30" rx="8" ry="19" transform="rotate(112.5 50 30)"/>
-          <ellipse cx="50" cy="30" rx="8" ry="19" transform="rotate(157.5 50 30)"/>
+        <g class="petals" fill="#f6c83f" stroke="#dfaa28" stroke-width="1.2">
+          <ellipse cx="50" cy="33" rx="8.5" ry="24"/>
+          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(30 50 33)"/>
+          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(60 50 33)"/>
+          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(90 50 33)"/>
+          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(120 50 33)"/>
+          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(150 50 33)"/>
+          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(15 50 33)"/>
+          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(45 50 33)"/>
+          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(75 50 33)"/>
+          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(105 50 33)"/>
+          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(135 50 33)"/>
+          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(165 50 33)"/>
         </g>
-        <circle cx="50" cy="30" r="11" fill="#694522" stroke="#4d351e" stroke-width="1.5"/>
-        <g fill="#e6b35b" opacity=".9">
-          <circle cx="46" cy="26" r="1.2"/><circle cx="54" cy="27" r="1.2"/><circle cx="49" cy="33" r="1.2"/>
-          <circle cx="55" cy="34" r="1.2"/><circle cx="44" cy="32" r="1.2"/><circle cx="50" cy="24" r="1.2"/>
+        <circle cx="50" cy="33" r="13" fill="#704a25" stroke="#4d351e" stroke-width="1.7"/>
+        <g fill="#e9b55c" opacity=".95">
+          <circle cx="45" cy="28" r="1.5"/><circle cx="54" cy="28" r="1.5"/><circle cx="50" cy="35" r="1.5"/>
+          <circle cx="57" cy="36" r="1.5"/><circle cx="43" cy="35" r="1.5"/><circle cx="50" cy="24" r="1.5"/>
+          <circle cx="45" cy="39" r="1.2"/><circle cx="55" cy="40" r="1.2"/>
         </g>
       </g>
     </svg>`;
@@ -198,23 +210,30 @@
     const token = roundToken;
     setStatus("The garden is growing…", "Hold still for the big reveal.");
     plants.forEach(p => p.el.classList.add("is-grown"));
-    let remaining = 4;
+    let remaining = 3;
     showCountdown(remaining);
     countdownSound(remaining);
     const startedAt = performance.now();
     function tick() {
       if (token !== roundToken || state !== State.COUNTDOWN) return;
       const elapsed = performance.now() - startedAt;
-      const next = Math.max(0, 4 - Math.floor(elapsed / 1000));
+      const next = Math.max(0, 3 - Math.floor(elapsed / 1000));
       if (next !== remaining && next > 0) {
         remaining = next;
         showCountdown(remaining);
         countdownSound(remaining);
-        vibrate(12);
+        if (remaining === 1) {
+          garden.classList.add("anticipation");
+          tone(880, .24, "sine", .022, .06);
+          vibrate(18);
+        } else {
+          vibrate(10);
+        }
       }
       if (elapsed >= GROWTH_COUNTDOWN_MS) {
         countdown.classList.remove("visible");
         countdown.textContent = "";
+        garden.classList.remove("anticipation");
         chooseWinner(token);
       } else {
         tickTimer = schedule(tick, 45);
@@ -239,6 +258,7 @@
     const winnerIndex = secureRandomIndex(entries.length);
     const winner = entries[winnerIndex];
     state = State.RESULT;
+    garden.classList.remove("anticipation");
     plants.forEach(p => {
       if (p === winner) {
         p.el.classList.add("is-winner");
@@ -253,7 +273,7 @@
     banner.classList.add("visible");
     announce(`Player ${winner.labelIndex} goes first!`);
     bloomSound();
-    vibrate([30,45,70]);
+    vibrate([24,35,55,35,95]);
     resultTimer = schedule(() => {
       // Keep the winner visible until replay; no automatic reset.
       resultTimer = null;

@@ -49,29 +49,47 @@ h1 span { color:#e2a62d; }
   position:absolute; width:74px; height:130px; transform:translate(-50%,-82%);
   display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
   --plant-color:#60956a; --plant-accent:#d7e7bd; --growth:0;
-  transition:left .15s ease-out, top .15s ease-out;
+  transition:left .22s cubic-bezier(.2,.7,.2,1), top .22s cubic-bezier(.2,.7,.2,1), transform .45s cubic-bezier(.2,.8,.2,1);
 }
 .plant svg { width:100%; height:100%; overflow:visible; filter:drop-shadow(0 5px 3px rgba(54,89,51,.08)); }
-.plant .stem { stroke:var(--plant-color); stroke-width:4; stroke-linecap:round; fill:none; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 3.7s cubic-bezier(.2,.75,.2,1); }
-.plant .leaf { fill:var(--plant-accent); stroke:var(--plant-color); stroke-width:1.6; transform-box:fill-box; transform-origin:center; transform:scale(.05); transition:transform 3.7s cubic-bezier(.2,.75,.2,1); }
-.plant .bud { fill:var(--plant-color); stroke:#477852; stroke-width:1.5; transform-box:fill-box; transform-origin:50% 90%; transform:scale(.12); transition:transform .5s cubic-bezier(.2,1.5,.5,1); }
+.plant .stem { stroke:var(--plant-color); stroke-width:4; stroke-linecap:round; fill:none; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset 2.7s cubic-bezier(.22,.65,.25,1); }
+.plant .leaf { fill:var(--plant-accent); stroke:var(--plant-color); stroke-width:1.6; transform-box:fill-box; transform-origin:center; transform:scale(.015) rotate(-12deg); opacity:.25; transition:transform 2.65s cubic-bezier(.2,.72,.2,1), opacity 1.8s ease; }
+.plant .leaf-b, .plant .leaf-d { transform-origin:15% 85%; }
+.plant .leaf-a, .plant .leaf-c { transform-origin:85% 85%; }
+.plant .bud { fill:var(--plant-color); stroke:#477852; stroke-width:1.5; transform-box:fill-box; transform-origin:50% 90%; transform:scale(.08); opacity:.65; transition:transform .85s cubic-bezier(.2,1.15,.4,1), opacity .7s ease; }
+.plant .seed { transform-box:fill-box; transform-origin:center; opacity:1; transition:opacity .65s ease, transform .9s cubic-bezier(.2,.8,.2,1); }
 .plant .soil { fill:#d9c6a0; opacity:.75; }
-.plant .flower { opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.1) rotate(-30deg); transition:opacity .45s ease, transform .8s cubic-bezier(.2,1.5,.5,1); }
+.plant .flower { opacity:0; transform-box:fill-box; transform-origin:50% 35%; transform:scale(.04) rotate(-32deg); transition:opacity .5s ease, transform 1.15s cubic-bezier(.16,1.2,.3,1); filter:drop-shadow(0 0 0 rgba(255,202,69,0)); }
+.plant .petals { transform-box:fill-box; transform-origin:center; }
+.plant.is-bud .seed { opacity:.18; transform:translateY(8px) scale(.65); }
+.plant.is-bud .bud { transform:scale(.62); opacity:1; }
+.plant.is-bud .stem { stroke-dashoffset:.72; transition-duration:1.05s; }
+.plant.is-bud .leaf { transform:scale(.18) rotate(0); opacity:.7; transition-duration:1.05s; }
 .plant.is-bud .bud { transform:scale(1); }
-.plant.is-grown .stem { stroke-dashoffset:0; }
-.plant.is-grown .leaf { transform:scale(1); }
-.plant.is-grown .bud { transform:scale(.8); }
-.plant.is-winner { z-index:10; }
-.plant.is-winner .flower { opacity:1; transform:scale(1) rotate(0); }
+.plant.is-grown .seed { opacity:0; transform:translateY(12px) scale(.35); }
+.plant.is-grown .stem { stroke-dashoffset:0; transition-duration:2.65s; }
+.plant.is-grown .leaf { transform:scale(1) rotate(0); opacity:1; transition-duration:2.65s; }
+.plant.is-grown .bud { transform:scale(.86); opacity:1; transition-duration:2.65s; }
+.plant.is-winner { z-index:10; transform:translate(-50%,-82%) scale(1.7); filter:drop-shadow(0 0 22px rgba(255,197,55,.68)); }
+.plant.is-winner::before { content:""; position:absolute; left:50%; top:4px; width:148px; height:148px; transform:translateX(-50%); border-radius:50%; background:radial-gradient(circle, rgba(255,222,108,.48) 0%, rgba(255,218,96,.24) 38%, rgba(255,225,134,0) 72%); filter:blur(7px); opacity:0; animation:sunflower-glow 2.4s ease-in-out infinite alternate; z-index:-1; }
+.plant.is-winner .flower { opacity:1; transform:scale(1.65) rotate(0); filter:drop-shadow(0 0 11px rgba(255,202,69,.8)); }
+.plant.is-winner .bud { transform:scale(.05); opacity:0; }
+.plant.is-winner .seed { opacity:0; }
+.plant.is-winner .plant-label { transform:translateX(-50%) scale(.68); transform-origin:top center; }
 .plant.is-winner .stem { stroke-dashoffset:0; }
 .plant.is-winner .leaf { transform:scale(1); }
-.plant.is-loser .stem { stroke-dashoffset:1; transition-duration:.9s; }
-.plant.is-loser .leaf { transform:scale(.02); transition-duration:.9s; }
-.plant.is-loser .bud { transform:scale(.12); transition-duration:.9s; }
+.plant.is-loser .stem { stroke-dashoffset:1; transition-duration:1.15s; }
+.plant.is-loser .leaf { transform:scale(.015) rotate(-12deg); opacity:.15; transition-duration:1.05s; }
+.plant.is-loser .bud { transform:scale(.08); opacity:.65; transition-duration:.9s; }
+.plant.is-loser .seed { opacity:1; transform:translateY(0) scale(1); transition-delay:.3s; }
 .plant-label { position:absolute; bottom:-20px; left:50%; transform:translateX(-50%); white-space:nowrap; padding:4px 8px; border-radius:99px; background:rgba(255,255,255,.86); border:1px solid rgba(36,69,54,.1); color:var(--ink); font-size:10px; font-weight:750; letter-spacing:.01em; box-shadow:0 2px 8px rgba(30,55,35,.04); }
 .plant.is-winner .plant-label { background:#fff5c9; border-color:#efd46e; color:#73551a; font-size:12px; bottom:-24px; }
 .countdown { position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; z-index:20; font-size:clamp(60px, 15vw, 110px); font-weight:900; letter-spacing:-.08em; color:#315d3c; text-shadow:0 5px 0 rgba(255,255,255,.7); opacity:0; transform:scale(.75); }
-.countdown.visible { opacity:1; transform:scale(1); transition:transform .22s cubic-bezier(.2,1.4,.4,1), opacity .18s; }
+.countdown.visible { opacity:1; transform:scale(1); transition:transform .34s cubic-bezier(.2,1.25,.4,1), opacity .24s; }
+.garden.anticipation { animation:anticipation-pulse .72s ease-in-out infinite alternate; }
+.garden.anticipation .countdown { color:#a56e16; text-shadow:0 0 22px rgba(255,205,84,.75), 0 5px 0 rgba(255,255,255,.75); }
+@keyframes sunflower-glow { from { opacity:.65; transform:translateX(-50%) scale(.9); } to { opacity:1; transform:translateX(-50%) scale(1.2); } }
+@keyframes anticipation-pulse { from { box-shadow:0 18px 50px rgba(39,67,49,.09), inset 0 0 0 rgba(255,211,101,0); } to { box-shadow:0 18px 50px rgba(39,67,49,.09), inset 0 0 70px rgba(255,211,101,.18); } }
 .result-banner { position:absolute; left:50%; top:15px; transform:translate(-50%,-10px); opacity:0; z-index:30; padding:10px 16px; max-width:calc(100% - 24px); border-radius:16px; text-align:center; white-space:nowrap; color:#6b4e12; background:rgba(255,247,203,.96); border:1px solid #f0d778; font-weight:850; font-size:clamp(12px,2.8vw,16px); box-shadow:0 8px 25px rgba(126,96,21,.12); transition:opacity .35s, transform .35s; }
 .result-banner.visible { opacity:1; transform:translate(-50%,0); }
 .controls { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:15px 2px 3px; flex-shrink:0; }

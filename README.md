@@ -6,8 +6,8 @@ A cozy botanical multitouch web app for deciding who starts a board game. Design
 
 1. Open the app on a touchscreen.
 2. Each player places and holds one finger in the garden (2–6 players).
-3. Every new finger restarts the five-second joining window.
-4. When the garden has been untouched for five seconds, plants grow during a four-second countdown.
+3. Every new finger restarts the three-second joining window.
+4. When the garden has been untouched for three seconds, plants grow continuously during a three-second countdown.
 5. One player is randomly selected: their plant blooms into a sunflower; the others return to seeds.
 6. Tap **Play again** to start a fresh round.
 
@@ -39,7 +39,7 @@ GitHub Pages URLs are case-sensitive. If you use a repository name other than `w
 
 - [ ] Two people hold two fingers at the same time.
 - [ ] Six people join; a seventh touch is ignored.
-- [ ] A new finger joins just before the timer expires; the five-second window restarts.
+- [ ] A new finger joins just before the timer expires; the three-second window restarts.
 - [ ] A player lifts their finger while joining; the participant is removed.
 - [ ] Fewer than two players remain; the countdown does not choose a winner.
 - [ ] Countdown finishes and exactly one sunflower blooms.
