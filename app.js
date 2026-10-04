@@ -13,6 +13,11 @@
   const resetButton = document.getElementById("reset-button");
   const soundToggle = document.getElementById("sound-toggle");
   const soundIcon = document.getElementById("sound-icon");
+  const vibrationToggle = document.getElementById("vibration-toggle");
+  const vibrationIcon = document.getElementById("vibration-icon");
+  const themeToggle = document.getElementById("theme-toggle");
+  const themeIcon = document.getElementById("theme-icon");
+  const themeColorMeta = document.getElementById("theme-color-meta");
 
   const JOIN_WINDOW_MS = 2000;
   const GROWTH_COUNTDOWN_MS = 2000;
@@ -32,11 +37,38 @@
   let tickTimer = null;
   let resultTimer = null;
   let soundEnabled = true;
+  let vibrationEnabled = true;
+  const vibrationSupported = typeof navigator.vibrate === "function";
   let audioContext = null;
   let lastPointerPositions = new Map();
   let roundToken = 0;
 
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Dark is the default on first launch; a user choice is remembered locally.
+  const THEME_KEY = "who-goes-first-theme";
+  function readTheme() {
+    try { return localStorage.getItem(THEME_KEY) === "light" ? "light" : "dark"; }
+    catch (_) { return document.documentElement.dataset.theme === "light" ? "light" : "dark"; }
+  }
+  function applyTheme(theme, persist = false) {
+    const next = theme === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    const isDark = next === "dark";
+    themeToggle.setAttribute("aria-pressed", String(isDark));
+    themeToggle.setAttribute("aria-label", isDark ? "Switch to light mode" : "Switch to dark mode");
+    themeToggle.title = isDark ? "Switch to light mode" : "Switch to dark mode";
+    themeIcon.textContent = isDark ? "☼" : "☾";
+    if (themeColorMeta) themeColorMeta.setAttribute("content", isDark ? "#17251f" : "#f7f5ec");
+    if (persist) { try { localStorage.setItem(THEME_KEY, next); } catch (_) {} }
+  }
+  applyTheme(readTheme());
+
+  const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let reducedMotion = motionPreference.matches;
+  // Keep the animation preference current if the user changes it while the app is open.
+  if (typeof motionPreference.addEventListener === "function") {
+    motionPreference.addEventListener("change", event => { reducedMotion = event.matches; });
+  }
 
   function schedule(fn, delay) {
     const id = window.setTimeout(() => { timers.delete(id); fn(); }, delay);
@@ -55,11 +87,15 @@
     title.textContent = heading;
     detail.textContent = description;
   }
-  function announce(message) { announcement.textContent = message; }
+  function announce(message) {
+    // Clear first so assistive technology can announce repeated messages too.
+    announcement.textContent = "";
+    window.requestAnimationFrame(() => { announcement.textContent = message; });
+  }
   function playerWord(n) { return `${n} ${n === 1 ? "player" : "players"}`; }
   function updateCount() {
     const n = plants.size;
-    countLabel.textContent = `${n} ${n === 1 ? "player" : "players"} joined`;
+    countLabel.textContent = `${n} / ${MAX_PLAYERS} players joined`;
     hint.style.opacity = n ? "0" : "1";
   }
   function getAudio() {
@@ -91,7 +127,25 @@
   function countdownSound(n) { tone(n === 1 ? 760 : 560,.12,"triangle",.03); }
   function bloomSound() { [523,659,784,1047].forEach((f,i) => tone(f,.36,"sine",.035,i*.09)); }
   function vibrate(pattern) {
-    if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (_) {} }
+    // Vibration is optional: unsupported browsers and user-disabled haptics
+    // must never interrupt or alter the round state.
+    if (!vibrationEnabled || !vibrationSupported) return;
+    try { navigator.vibrate(pattern); } catch (_) {}
+  }
+
+  function syncVibrationControl() {
+    vibrationToggle.setAttribute("aria-pressed", String(vibrationEnabled));
+    vibrationToggle.setAttribute("aria-label", vibrationEnabled ? "Turn vibration off" : "Turn vibration on");
+    vibrationIcon.textContent = vibrationEnabled ? "〰" : "∿";
+  }
+
+  if (!vibrationSupported) {
+    vibrationToggle.disabled = true;
+    vibrationToggle.setAttribute("aria-pressed", "false");
+    vibrationToggle.setAttribute("aria-label", "Vibration is not supported in this browser");
+    vibrationToggle.title = "Vibration is not supported in this browser";
+    vibrationIcon.textContent = "∿";
+    vibrationEnabled = false;
   }
 
   function plantSvg() {
@@ -113,39 +167,45 @@
       </g>
       <g class="flower">
         <g class="petals" fill="#f6c83f" stroke="#dfaa28" stroke-width="1.2">
-          <ellipse cx="50" cy="33" rx="8.5" ry="24"/>
-          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(30 50 33)"/>
-          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(60 50 33)"/>
-          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(90 50 33)"/>
-          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(120 50 33)"/>
-          <ellipse cx="50" cy="33" rx="8.5" ry="24" transform="rotate(150 50 33)"/>
-          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(15 50 33)"/>
-          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(45 50 33)"/>
-          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(75 50 33)"/>
-          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(105 50 33)"/>
-          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(135 50 33)"/>
-          <ellipse cx="50" cy="33" rx="7.5" ry="21" transform="rotate(165 50 33)"/>
+          <ellipse cx="50" cy="49" rx="8.5" ry="24"/>
+          <ellipse cx="50" cy="49" rx="8.5" ry="24" transform="rotate(30 50 49)"/>
+          <ellipse cx="50" cy="49" rx="8.5" ry="24" transform="rotate(60 50 49)"/>
+          <ellipse cx="50" cy="49" rx="8.5" ry="24" transform="rotate(90 50 49)"/>
+          <ellipse cx="50" cy="49" rx="8.5" ry="24" transform="rotate(120 50 49)"/>
+          <ellipse cx="50" cy="49" rx="8.5" ry="24" transform="rotate(150 50 49)"/>
+          <ellipse cx="50" cy="49" rx="7.5" ry="21" transform="rotate(15 50 49)"/>
+          <ellipse cx="50" cy="49" rx="7.5" ry="21" transform="rotate(45 50 49)"/>
+          <ellipse cx="50" cy="49" rx="7.5" ry="21" transform="rotate(75 50 49)"/>
+          <ellipse cx="50" cy="49" rx="7.5" ry="21" transform="rotate(105 50 49)"/>
+          <ellipse cx="50" cy="49" rx="7.5" ry="21" transform="rotate(135 50 49)"/>
+          <ellipse cx="50" cy="49" rx="7.5" ry="21" transform="rotate(165 50 49)"/>
         </g>
-        <circle cx="50" cy="33" r="13" fill="#704a25" stroke="#4d351e" stroke-width="1.7"/>
+        <circle cx="50" cy="49" r="13" fill="#704a25" stroke="#4d351e" stroke-width="1.7"/>
         <g fill="#e9b55c" opacity=".95">
-          <circle cx="45" cy="28" r="1.5"/><circle cx="54" cy="28" r="1.5"/><circle cx="50" cy="35" r="1.5"/>
-          <circle cx="57" cy="36" r="1.5"/><circle cx="43" cy="35" r="1.5"/><circle cx="50" cy="24" r="1.5"/>
-          <circle cx="45" cy="39" r="1.2"/><circle cx="55" cy="40" r="1.2"/>
+          <circle cx="45" cy="44" r="1.5"/><circle cx="54" cy="44" r="1.5"/><circle cx="50" cy="51" r="1.5"/>
+          <circle cx="57" cy="52" r="1.5"/><circle cx="43" cy="51" r="1.5"/><circle cx="50" cy="40" r="1.5"/>
+          <circle cx="45" cy="55" r="1.2"/><circle cx="55" cy="56" r="1.2"/>
         </g>
       </g>
     </svg>`;
   }
 
   function makePlant(pointerId, point) {
-    const index = plants.size;
-    const [color, accent] = PALETTE[index % PALETTE.length];
+    // Assign the lowest currently unused player number. If someone lifts a
+    // finger during the joining window, a later player can reuse that number
+    // without creating duplicate labels among the plants still in the garden.
+    const usedLabels = new Set(Array.from(plants.values(), player => player.labelIndex));
+    let labelIndex = 1;
+    while (usedLabels.has(labelIndex) && labelIndex <= MAX_PLAYERS) labelIndex++;
+    if (labelIndex > MAX_PLAYERS) return null;
+    const [color, accent] = PALETTE[(labelIndex - 1) % PALETTE.length];
     const el = document.createElement("div");
     el.className = "plant";
     el.style.setProperty("--plant-color", color);
     el.style.setProperty("--plant-accent", accent);
-    el.innerHTML = plantSvg() + `<span class="plant-label">Player ${index + 1}</span>`;
+    el.innerHTML = plantSvg() + `<span class="plant-label">Player ${labelIndex}</span>`;
     layer.appendChild(el);
-    const player = { id: nextId++, pointerId, el, x:point.x, y:point.y, color, accent, labelIndex:index+1 };
+    const player = { id: nextId++, pointerId, el, x:point.x, y:point.y, color, accent, labelIndex };
     plants.set(pointerId, player);
     placePlant(player, point.x, point.y);
     // Trigger bud on the next paint so the CSS transition is visible.
@@ -251,11 +311,28 @@
   }
 
   function chooseWinner(token) {
+    // This guard makes the reveal a one-shot transition: stale timers and
+    // duplicate callbacks cannot select a second winner for the same round.
     if (token !== roundToken || state !== State.COUNTDOWN) return;
+
+    // Freeze the eligible roster before drawing. Only participants present at
+    // the end of the countdown are eligible; animation and later input cannot
+    // change the odds once this snapshot is taken.
     const entries = Array.from(plants.values());
-    if (entries.length < 2) { cancelRound("Not enough players this time. Try again."); return; }
-    // Use crypto-backed randomness when available; unbiased rejection sampling avoids modulo bias.
-    const winnerIndex = secureRandomIndex(entries.length);
+    if (entries.length < 2) {
+      cancelRound("Not enough players this time. Try again.");
+      return;
+    }
+
+    let winnerIndex;
+    try {
+      winnerIndex = secureRandomIndex(entries.length);
+    } catch (error) {
+      // Never silently fall back to Math.random(): if secure randomness is
+      // unavailable, stop safely and explain why no winner was selected.
+      cancelRound("Secure random selection is unavailable. Please reopen the app and try again.");
+      return;
+    }
     const winner = entries[winnerIndex];
     state = State.RESULT;
     garden.classList.remove("anticipation");
@@ -271,7 +348,8 @@
     setStatus("A sunflower has bloomed!", "The garden has chosen your first player.");
     banner.textContent = `🌻 Player ${winner.labelIndex} goes first!`;
     banner.classList.add("visible");
-    announce(`Player ${winner.labelIndex} goes first!`);
+    resetButton.classList.add("is-result");
+    announce(`Player ${winner.labelIndex} goes first! Tap Play again for a new round.`);
     bloomSound();
     vibrate([24,35,55,35,95]);
     resultTimer = schedule(() => {
@@ -281,12 +359,15 @@
   }
 
   function secureRandomIndex(max) {
-    // GitHub Pages is HTTPS, so Web Crypto is available. Use a cryptographically
-    // strong random value and rejection sampling so every participant has equal odds.
+    // Return a uniformly distributed integer in [0, max). Rejection sampling
+    // removes modulo bias; Web Crypto is required and there is no weak fallback.
+    if (!Number.isInteger(max) || max < 1 || max > MAX_PLAYERS) {
+      throw new RangeError("Invalid participant count for random selection.");
+    }
     if (!window.crypto || typeof window.crypto.getRandomValues !== "function") {
       throw new Error("Secure randomness is unavailable in this browser.");
     }
-    const range = 0x100000000;
+    const range = 0x100000000; // Number of possible Uint32 values
     const limit = range - (range % max);
     const values = new Uint32Array(1);
     let value;
@@ -298,9 +379,21 @@
   }
 
   function cancelRound(message) {
+    // Invalidate every callback from the interrupted round before changing UI.
     clearAllTimers();
     roundToken++;
     state = State.IDLE;
+    countdown.classList.remove("visible");
+    countdown.textContent = "";
+    garden.classList.remove("anticipation");
+    banner.classList.remove("visible");
+    banner.textContent = "";
+    resetButton.classList.remove("is-result");
+    plants.forEach(p => {
+      p.el.classList.remove("is-grown", "is-winner", "is-loser");
+      const label = p.el.querySelector(".plant-label");
+      if (label) label.textContent = `Player ${p.labelIndex}`;
+    });
     setStatus("Let's grow again", message);
     announce(message);
   }
@@ -311,10 +404,13 @@
     plants.forEach(p => p.el.remove());
     plants.clear();
     lastPointerPositions.clear();
+    activeGardenTouches.clear();
     countdown.classList.remove("visible");
     countdown.textContent = "";
+    garden.classList.remove("anticipation");
     banner.classList.remove("visible");
     banner.textContent = "";
+    resetButton.classList.remove("is-result");
     state = State.IDLE;
     setStatus("Gather your players", "Everyone, place one finger anywhere in the garden.");
     updateCount();
@@ -328,7 +424,8 @@
       setStatus("Garden is full!", "Six players are ready. Let the countdown finish.");
       return;
     }
-    makePlant(key, point);
+    const player = makePlant(key, point);
+    if (!player) return;
     lastPointerPositions.set(key, point);
     if (state === State.IDLE) state = State.JOINING;
     resetJoinTimer();
@@ -369,36 +466,119 @@
     }
   }
 
-  // Handle touch input directly. iOS can emit pointercancel/lostpointercapture events
-  // when several fingers are down; treating those as lifted fingers can clear the round.
-  // Touch identifiers are namespaced so they can never collide with mouse pointer IDs.
-  garden.addEventListener("touchstart", event => {
-    event.preventDefault();
-    for (const touch of event.changedTouches) {
-      addParticipant(`touch-${touch.identifier}`, {
-        x: touch.clientX - garden.getBoundingClientRect().left,
-        y: touch.clientY - garden.getBoundingClientRect().top
-      });
-    }
-  }, { passive:false });
-
-  garden.addEventListener("touchmove", event => {
-    event.preventDefault();
+  // Touch Events are the single source of truth for finger input on iOS.
+  // The registry stores every touch that began in the garden, including touches
+  // rejected because the six-player limit was reached. This prevents later end /
+  // cancel events from being confused with registered players.
+  const activeGardenTouches = new Map(); // touch identifier -> { accepted: boolean }
+  function touchKey(identifier) { return `touch-${identifier}`; }
+  function touchPoint(touch) {
     const rect = garden.getBoundingClientRect();
-    for (const touch of event.changedTouches) {
-      moveParticipant(`touch-${touch.identifier}`, {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
-      });
-    }
-  }, { passive:false });
-
-  function handleTouchEnd(event) {
-    event.preventDefault();
-    for (const touch of event.changedTouches) removeParticipant(`touch-${touch.identifier}`);
+    return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
   }
-  garden.addEventListener("touchend", handleTouchEnd, { passive:false });
-  garden.addEventListener("touchcancel", handleTouchEnd, { passive:false });
+  function isTouchInGarden(touch) {
+    const rect = garden.getBoundingClientRect();
+    return touch.clientX >= rect.left && touch.clientX <= rect.right &&
+      touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+  }
+
+  document.addEventListener("touchstart", event => {
+    let startedInGarden = false;
+    // Determine the interaction region from coordinates, not event.target:
+    // Safari may retarget later fingers to an existing plant or child element.
+    for (const touch of event.changedTouches) {
+      if (isTouchInGarden(touch)) { startedInGarden = true; break; }
+    }
+    // Prevent Safari from turning multi-finger contact into page gestures.
+    if (startedInGarden) event.preventDefault();
+
+    for (const touch of event.changedTouches) {
+      if (!isTouchInGarden(touch)) continue;
+      const id = touch.identifier;
+      if (activeGardenTouches.has(id)) continue;
+      const key = touchKey(id);
+      const wasAccepted = plants.has(key);
+      addParticipant(key, touchPoint(touch));
+      activeGardenTouches.set(id, { accepted: !wasAccepted && plants.has(key) });
+    }
+  }, { capture:true, passive:false });
+
+  document.addEventListener("touchmove", event => {
+    let handled = false;
+    for (const touch of event.changedTouches) {
+      const record = activeGardenTouches.get(touch.identifier);
+      if (!record) continue;
+      handled = true;
+      if (record.accepted) moveParticipant(touchKey(touch.identifier), touchPoint(touch));
+    }
+    if (handled) event.preventDefault();
+  }, { capture:true, passive:false });
+
+  function finishGardenTouches(event, cancelled = false) {
+    const affected = [];
+    for (const touch of event.changedTouches) {
+      const record = activeGardenTouches.get(touch.identifier);
+      if (!record) continue;
+      activeGardenTouches.delete(touch.identifier);
+      if (record.accepted) affected.push(touchKey(touch.identifier));
+    }
+    if (!affected.length) return;
+
+    // Batch releases so a multi-touch cancellation cannot repeatedly transition
+    // the round or restart timers once for every finger in the same event.
+    if (state === State.COUNTDOWN || state === State.RESULT) {
+      affected.forEach(key => lastPointerPositions.delete(key));
+      return;
+    }
+    for (const key of affected) {
+      lastPointerPositions.delete(key);
+      const player = plants.get(key);
+      if (player) player.el.remove();
+      plants.delete(key);
+    }
+    updateCount();
+
+    if (plants.size < 2) {
+      clearTimer(joinTimer); clearTimer(tickTimer);
+      joinTimer = tickTimer = null;
+      joinDeadline = 0;
+      state = plants.size ? State.JOINING : State.IDLE;
+      if (plants.size === 1) {
+        setStatus("Need one more player", "Keep one finger down and invite another player to join.");
+      } else {
+        setStatus("Gather your players", "Everyone, place one finger anywhere in the garden.");
+      }
+    } else {
+      state = State.JOINING;
+      resetJoinTimer();
+    }
+  }
+
+  document.addEventListener("touchend", event => finishGardenTouches(event, false), { capture:true, passive:false });
+
+  // iOS may dispatch touchcancel for several contacts at once (for example,
+  // when the browser interrupts a multi-touch sequence). Do not interpret that
+  // browser cancellation as every player deliberately lifting their finger.
+  // Forget the cancelled input identifiers, but preserve their plants for this
+  // round. The player can finish the draw or use Replay to start cleanly.
+  document.addEventListener("touchcancel", event => {
+    let handled = false;
+    for (const touch of event.changedTouches) {
+      const record = activeGardenTouches.get(touch.identifier);
+      if (!record) continue;
+      activeGardenTouches.delete(touch.identifier);
+      handled = true;
+      // Intentionally preserve accepted participants on cancellation.
+      // This avoids a bulk touchcancel event clearing the entire garden.
+    }
+    if (handled) {
+      event.preventDefault();
+      if (state === State.JOINING && plants.size > 0) {
+        // Keep the existing join deadline; cancellation must not restart it.
+        updateStatusForJoining();
+      }
+    }
+  }, { capture:true, passive:false });
 
   // Pointer events are retained for mouse and stylus input only.
   garden.addEventListener("pointerdown", event => {
@@ -421,17 +601,29 @@
   document.addEventListener("pointerup", handlePointerEnd, { passive:false });
   document.addEventListener("pointercancel", handlePointerEnd, { passive:false });
 
+  themeToggle.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(next, true);
+  });
   resetButton.addEventListener("click", resetRound);
   soundToggle.addEventListener("click", () => {
     soundEnabled = !soundEnabled;
-    soundToggle.setAttribute("aria-pressed", String(!soundEnabled));
+    soundToggle.setAttribute("aria-pressed", String(soundEnabled));
     soundToggle.setAttribute("aria-label", soundEnabled ? "Turn sound off" : "Turn sound on");
     soundIcon.textContent = soundEnabled ? "♫" : "♪̸";
     if (soundEnabled) { tone(660,.12,"sine",.025); }
   });
+  vibrationToggle.addEventListener("click", () => {
+    if (!vibrationSupported) return;
+    vibrationEnabled = !vibrationEnabled;
+    syncVibrationControl();
+    if (vibrationEnabled) vibrate(12);
+    else { try { navigator.vibrate(0); } catch (_) {} }
+  });
 
-  // A lifted finger during the countdown removes that participant and cancels if fewer than two remain.
-  // During the result reveal, pointer releases are ignored so the winning flower stays on screen.
+  // Normal finger lifts remove only the matching participant before lock-in.
+  // A browser touchcancel preserves that participant for this round; Replay
+  // clears all state deliberately. During the result reveal, releases are ignored.
   updateCount();
   window.addEventListener("resize", () => {
     if (state === State.COUNTDOWN || state === State.RESULT) return;

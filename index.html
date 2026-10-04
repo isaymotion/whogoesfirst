@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#f7f5ec">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17251f" id="theme-color-meta">
   <meta name="description" content="A tiny botanical multitouch game to decide who goes first.">
   <title>Who Goes First? — A Tiny Garden Game</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("who-goes-first-theme")||"dark"}catch(_){document.documentElement.dataset.theme="dark"}</script>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -19,17 +20,25 @@
         <p class="eyebrow">A TINY GARDEN GAME</p>
         <h1>Who goes first<span>?</span></h1>
       </div>
-      <button id="sound-toggle" class="icon-button" type="button" aria-label="Turn sound off" title="Toggle sound">
-        <span id="sound-icon" aria-hidden="true">♫</span>
-      </button>
+      <div class="audio-controls" role="group" aria-label="Display and feedback settings">
+        <button id="theme-toggle" class="icon-button theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="true" title="Switch theme">
+          <span id="theme-icon" aria-hidden="true">☼</span>
+        </button>
+        <button id="sound-toggle" class="icon-button" type="button" aria-label="Turn sound off" aria-pressed="true" title="Toggle sound">
+          <span id="sound-icon" aria-hidden="true">♫</span>
+        </button>
+        <button id="vibration-toggle" class="icon-button" type="button" aria-label="Turn vibration off" aria-pressed="true" title="Toggle vibration">
+          <span id="vibration-icon" aria-hidden="true">〰</span>
+        </button>
+      </div>
     </header>
 
-    <section class="intro" aria-live="polite">
-      <p id="status-title" class="status-title">Gather your players</p>
+    <section class="intro">
+      <p id="status-title" class="status-title" role="status" aria-live="polite" aria-atomic="true">Gather your players</p>
       <p id="status-detail" class="status-detail">Everyone, place one finger anywhere in the garden.</p>
     </section>
 
-    <section id="garden" class="garden" aria-label="Touch garden. Place one finger per player." role="application">
+    <section id="garden" class="garden" aria-label="Touch garden" aria-describedby="garden-hint status-detail" role="application" tabindex="0">
       <div class="garden-hint" id="garden-hint">
         <span class="hint-sparkle">✧</span>
         <span>One finger each<br><b>2–6 players</b></span>
@@ -41,8 +50,8 @@
     </section>
 
     <footer class="controls">
-      <div class="player-count"><span class="count-dot"></span><span id="player-count">0 players joined</span></div>
-      <button id="reset-button" class="reset-button" type="button">
+      <div class="player-count"><span class="count-dot" aria-hidden="true"></span><span id="player-count" aria-live="polite" aria-atomic="true">0 / 6 players joined</span></div>
+      <button id="reset-button" class="reset-button" type="button" aria-label="Play again and reset the garden">
         <span aria-hidden="true">↻</span> Play again
       </button>
     </footer>
@@ -51,5 +60,15 @@
     <div id="announcement" class="sr-only" aria-live="polite"></div>
   </main>
   <script src="./app.js" defer></script>
+  <script>
+    // Service workers require HTTPS (GitHub Pages qualifies) or localhost.
+    // Resolve relative to this page so project-site paths work correctly.
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register(new URL("./sw.js", document.baseURI), { scope: new URL("./", document.baseURI).pathname, updateViaCache: "none" })
+          .catch(error => console.warn("Offline support could not be enabled:", error));
+      });
+    }
+  </script>
 </body>
 </html>
